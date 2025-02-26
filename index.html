@@ -2,46 +2,38 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nạp tiền</title>
+  <title>API Trả Lời Tự Động</title>
 </head>
 <body>
-  <h2>Nạp tiền vào tài khoản</h2>
+  <h2>Hỏi đáp tự động</h2>
 
-  <form id="napTienForm">
-    <label>Tài khoản:</label><br>
-    <input type="text" id="taiKhoan" required><br><br>
-
-    <label>Số tiền:</label><br>
-    <input type="number" id="soTien" required><br><br>
-
-    <button type="submit">Nạp tiền</button>
+  <form id="hoiDapForm">
+    <label>Nhập câu hỏi:</label><br>
+    <input type="text" id="cauHoi" required><br><br>
+    <button type="submit">Gửi câu hỏi</button>
   </form>
 
   <p id="ketQua"></p>
 
-<script>
-  document.getElementById('napTienForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  <script>
+    document.getElementById('hoiDapForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    const taiKhoan = document.getElementById('taiKhoan').value;
-    const soTien = document.getElementById('soTien').value;
+      const cauHoi = document.getElementById('cauHoi').value;
 
-    try {
-      const res = await fetch('https://<tên-replit>.replit.dev/nap-tien', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taiKhoan, soTien })
-      });
+      try {
+        const res = await fetch('https://<tên-replit>.replit.dev/hoi-dap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cauHoi })
+        });
 
-      if (!res.ok) throw new Error(`Lỗi HTTP: ${res.status}`);
-
-      const data = await res.json();
-      document.getElementById('ketQua').innerText = data.message;
-    } catch (err) {
-      console.error('Chi tiết lỗi:', err);  // Xem lỗi ở console
-      document.getElementById('ketQua').innerText = 'Lỗi khi nạp tiền!';
-    }
-  });
-</script>
+        const data = await res.json();
+        document.getElementById('ketQua').innerText = data.traLoi;
+      } catch (err) {
+        document.getElementById('ketQua').innerText = 'Có lỗi xảy ra!';
+      }
+    });
+  </script>
 </body>
 </html>
