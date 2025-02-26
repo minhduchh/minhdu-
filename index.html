@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quà em đâu anh?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top left, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+      font-family: "Poppins", sans-serif;
+      overflow: hidden;
+    }
+
+    .centered {
+      text-align: center;
+      z-index: 1;
+    }
+
+    h4 {
+      font-size: 3em;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+      animation: blink 1.5s infinite alternate;
+    }
+
+    @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    label {
+      padding: 12px 35px;
+      font-size: 1.3em;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 10px;
+      display: inline-block;
+      transition: transform 0.3s ease, background-color 0.3s;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    label:hover {
+      transform: scale(1.15);
+    }
+
+    .no {
+      background-color: #ff6b6b;
+    }
+
+    .yes {
+      background-color: #1dd1a1;
+    }
+
+    input[type="checkbox"] {
+      display: none;
+    }
+
+    .answer--yes, .answer--no {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 10;
+    }
+
+    .answer--yes {
+      background: url("https://media.giphy.com/media/2dQ3FMaMFccpi/giphy.gif") center/cover no-repeat;
+    }
+
+    .answer--no {
+      background: url("https://media.giphy.com/media/QBEhpJHrv7poQ/giphy.gif") center/cover no-repeat;
+    }
+
+    input.yes[type="checkbox"]:checked ~ .answer--yes {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    input.no[type="checkbox"]:checked ~ .answer--no {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    input.no[type="checkbox"]:checked + label.no {
+      animation: shake 0.5s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Hiệu ứng pháo hoa */
+    #fireworks {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      visibility: hidden;
+    }
+
+    input.yes[type="checkbox"]:checked ~ #fireworks {
+      visibility: visible;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="centered">
+  <h4>Quà em đâu anh?</h4>
+  <input class="no" id="No" type="checkbox" name="answer" />
+  <label class="no" for="No">Không có đâu</label>
+
+  <input class="yes" id="Yes" type="checkbox" name="answer" />
+  <label class="yes" for="Yes">QUà em đây bé</label>
+
+  <div class="answer--yes"></div>
+  <div class="answer--no"></div>
+  <canvas id="fireworks"></canvas>
+</div>
+
+<script>
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  class Firework {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = canvas.height;
+      this.targetY = Math.random() * canvas.height / 2;
+      this.speed = 5 + Math.random() * 3;
+      this.exploded = false;
+      this.particles = [];
+    }
+    update() {
+      if (!this.exploded) {
+        this.y -= this.speed;
+        if (this.y <= this.targetY) {
+          this.exploded = true;
+          for (let i = 0; i < 50; i++) this.particles.push(new Particle(this.x, this.y));
+        }
+      } else {
+        this.particles.forEach((p) => p.update());
+        this.particles = this.particles.filter((p) => !p.done);
+        if (this.particles.length === 0) this.reset();
+      }
+    }
+    draw() {
+      if (!this.exploded) {
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        this.particles.forEach((p) => p.draw());
+      }
+    }
+  }
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x; this.y = y;
+      this.speed = Math.random() * 5 + 2;
+      this.angle = Math.random() * Math.PI * 2;
+      this.alpha = 1;
+      this.done = false;
+      this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+    }
+    update() {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+      this.speed *= 0.95;
+      this.alpha -= 0.02;
+      if (this.alpha <= 0) this.done = true;
+    }
+    draw() {
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  const fireworks = Array.from({ length: 5 }, () => new Firework());
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    fireworks.forEach((f) => { f.update(); f.draw(); });
+    requestAnimationFrame(animate);
+  }
+
+  document.getElementById("Yes").addEventListener("change", function () {
+    if (this.checked) animate();
+  });
+</script>
+
+</body>
+</html>
