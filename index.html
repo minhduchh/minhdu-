@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Nạp tiền</title>
+</head>
+<body>
+  <h2>Nạp tiền vào tài khoản</h2>
+
+  <form id="napTienForm">
+    <label>Tài khoản:</label><br>
+    <input type="text" id="taiKhoan" required><br><br>
+
+    <label>Số tiền:</label><br>
+    <input type="number" id="soTien" required><br><br>
+
+    <button type="submit">Nạp tiền</button>
+  </form>
+
+  <p id="ketQua"></p>
+
+<script>
+  document.getElementById('napTienForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const taiKhoan = document.getElementById('taiKhoan').value;
+    const soTien = document.getElementById('soTien').value;
+
+    try {
+      const res = await fetch('https://<tên-replit>.replit.dev/nap-tien', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taiKhoan, soTien })
+      });
+
+      if (!res.ok) throw new Error(`Lỗi HTTP: ${res.status}`);
+
+      const data = await res.json();
+      document.getElementById('ketQua').innerText = data.message;
+    } catch (err) {
+      console.error('Chi tiết lỗi:', err);  // Xem lỗi ở console
+      document.getElementById('ketQua').innerText = 'Lỗi khi nạp tiền!';
+    }
+  });
+</script>
+</body>
+</html>
