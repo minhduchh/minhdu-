@@ -2,24 +2,27 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>API Trả Lời Tự Động</title>
+  <title>💬 Hỏi đáp tự động</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+    input { width: 80%; padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
+    #traLoi { margin-top: 20px; font-size: 18px; font-weight: bold; }
+  </style>
 </head>
 <body>
-  <h2>Hỏi đáp tự động</h2>
-
-  <form id="hoiDapForm">
-    <label>Nhập câu hỏi:</label><br>
-    <input type="text" id="cauHoi" required><br><br>
-    <button type="submit">Gửi câu hỏi</button>
-  </form>
-
-  <p id="ketQua"></p>
+  <h1>💬 Hỏi đáp tự động</h1>
+  <input type="text" id="cauHoi" placeholder="Nhập câu hỏi..." required>
+  <br><br>
+  <button onclick="guiCauHoi()">Gửi câu hỏi</button>
+  <p id="traLoi"></p>
 
   <script>
-    document.getElementById('hoiDapForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function guiCauHoi() {
+      const cauHoi = document.getElementById('cauHoi').value.trim();
+      if (!cauHoi) return alert('❌ Vui lòng nhập câu hỏi.');
 
-      const cauHoi = document.getElementById('cauHoi').value;
+      document.getElementById('traLoi').innerText = '⏳ Đang xử lý...';
 
       try {
         const res = await fetch('https://de83ca0e-26a7-4c64-ae93-aef38fa0b968-00-1p5ex52g763we.pike.replit.dev/', {
@@ -29,11 +32,12 @@
         });
 
         const data = await res.json();
-        document.getElementById('ketQua').innerText = data.traLoi;
+        document.getElementById('traLoi').innerText = data.answer ?? '❌ Không có câu trả lời.';
       } catch (err) {
-        document.getElementById('ketQua').innerText = 'Có lỗi xảy ra!';
+        document.getElementById('traLoi').innerText = '❌ Có lỗi xảy ra. Vui lòng thử lại!';
+        console.error(err);
       }
-    });
+    }
   </script>
 </body>
 </html>
