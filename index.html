@@ -1,43 +1,56 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>💬 Hỏi đáp tự động</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
-    input { width: 80%; padding: 10px; font-size: 16px; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
-    #traLoi { margin-top: 20px; font-size: 18px; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Nhập và Cài Đặt Hồ Sơ MobileConfig</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .file-input {
+            margin: 20px 0;
+        }
+        .install-btn {
+            display: none;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .install-btn:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-  <h1>💬 Hỏi đáp tự động</h1>
-  <input type="text" id="cauHoi" placeholder="Nhập câu hỏi..." required>
-  <br><br>
-  <button onclick="guiCauHoi()">Gửi câu hỏi</button>
-  <p id="traLoi"></p>
+    <h1>Nhập và Cài Đặt Hồ Sơ MobileConfig</h1>
+    <p>Chọn file hồ sơ cấu hình từ thiết bị của bạn:</p>
 
-  <script>
-    async function guiCauHoi() {
-      const cauHoi = document.getElementById('cauHoi').value.trim();
-      if (!cauHoi) return alert('❌ Vui lòng nhập câu hỏi.');
+    <!-- Nút chọn file -->
+    <input type="file" id="fileInput" class="file-input" accept=".mobileconfig">
 
-      document.getElementById('traLoi').innerText = '⏳ Đang xử lý...';
+    <!-- Nút cài đặt -->
+    <a id="installBtn" class="install-btn" download="profile.mobileconfig">Cài Đặt Hồ Sơ</a>
 
-      try {
-        const res = await fetch('https://de83ca0e-26a7-4c64-ae93-aef38fa0b968-00-1p5ex52g763we.pike.replit.dev/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cauHoi })
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const installBtn = document.getElementById('installBtn');
+
+        fileInput.addEventListener('change', function() {
+            const file = fileInput.files[0];
+            if (file && file.name.endsWith('.mobileconfig')) {
+                const fileURL = URL.createObjectURL(file); // Tạo URL tạm thời cho file
+                installBtn.href = fileURL;
+                installBtn.style.display = 'inline-block'; // Hiển thị nút cài đặt
+            } else {
+                alert('Vui lòng chọn đúng file .mobileconfig');
+                installBtn.style.display = 'none';
+            }
         });
-
-        const data = await res.json();
-        document.getElementById('traLoi').innerText = data.answer ?? '❌ Không có câu trả lời.';
-      } catch (err) {
-        document.getElementById('traLoi').innerText = '❌ Có lỗi xảy ra. Vui lòng thử lại!';
-        console.error(err);
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
