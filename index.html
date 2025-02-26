@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>✨ MobileConfig Tool - Nhập & Chỉnh sửa VIP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: rgba(255, 255, 255, 0.6);
+            --text-color: #2c3e50;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --button-bg: linear-gradient(135deg, #6a11cb, #2575fc);
+            --highlight-color: rgba(241, 196, 15, 0.6);
+        }
+
+        body.dark {
+            --bg-color: rgba(44, 62, 80, 0.8);
+            --text-color: #ecf0f1;
+            --input-bg: rgba(52, 73, 94, 0.9);
+            --button-bg: linear-gradient(135deg, #ff416c, #ff4b2b);
+            --highlight-color: rgba(46, 204, 113, 0.6);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            backdrop-filter: blur(8px);
+            background: var(--bg-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #tabs {
+            display: flex;
+            margin: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--input-bg);
+            font-weight: bold;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+
+        .tab:hover { transform: scale(1.05); }
+        .tab.active { background: var(--button-bg); color: white; }
+
+        .section {
+            display: none;
+            flex: 1;
+            margin: 0 15px 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--bg-color);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            overflow: auto;
+        }
+
+        .section.active { display: block; }
+
+        input[type="file"], button {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+
+        input[type="file"] { background: var(--input-bg); color: var(--text-color); }
+        button { background: var(--button-bg); color: white; }
+
+        button:hover { transform: scale(1.05); }
+
+        #editor {
+            height: 60vh;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #toggleTheme {
+            padding: 10px 12px;
+            border-radius: 50%;
+            background: #8e44ad;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        #toggleTheme:hover { transform: scale(1.1); }
+
+        #searchPopup {
+            position: fixed;
+            top: 20%;
+            right: -400px;
+            width: 360px;
+            background: var(--bg-color);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: right 0.4s ease;
+            z-index: 1000;
+        }
+
+        #searchPopup.active { right: 20px; }
+
+        #searchPopup input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: none;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        #searchPopup button {
+            width: 48%;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 10px;
+            background: var(--button-bg);
+            color: white;
+            margin-top: 8px;
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        #resultCount {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        @media (max-width: 480px) {
+            #searchPopup { width: 90%; right: -100%; }
+            #searchPopup.active { right: 5%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📄 MobileConfig Tool</h1>
+    <button id="toggleTheme" title="Chuyển chế độ sáng/tối">
+        <i class="fas fa-adjust"></i>
+    </button>
+</header>
+
+<div id="tabs">
+    <div class="tab active" onclick="switchTab('uploadSection')">📥 Nhập & Tải Hồ sơ</div>
+    <div class="tab" onclick="switchTab('editSection')">📝 Chỉnh sửa File</div>
+</div>
+
+<div id="uploadSection" class="section active">
+    <input type="file" id="fileInput" accept=".mobileconfig">
+    <button onclick="downloadFile()">📥 Tải về Hồ sơ</button>
+</div>
+
+<div id="editSection" class="section">
+    <button onclick="toggleSearchPopup()">🔍 Tìm kiếm (Ctrl+F)</button>
+    <div id="editor">/* Dán hoặc nhập file .mobileconfig để chỉnh sửa */</div>
+</div>
+
+<div id="searchPopup">
+    <input type="text" id="searchInput" placeholder="🔍 Nhập từ cần tìm... (Enter)">
+    <input type="text" id="replaceInput" placeholder="✏️ Thay thế...">
+    <div class="options">
+        <label><input type="checkbox" id="regex"> RegEx</label>
+        <label><input type="checkbox" id="matchCase"> Hoa/thường</label>
+        <label><input type="checkbox" id="wholeWord"> Nguyên văn</label>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+        <button onclick="findNext()">➡️ Tiếp</button>
+        <button onclick="findPrev()">⬅️ Trước</button>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+        <button onclick="replace()">🔄 Thay</button>
+        <button onclick="replaceAll()">♻️ Thay tất</button>
+    </div>
+    <div id="resultCount">0 kết quả</div>
+</div>
+
+<!-- Monaco Editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+<script>
+    let editor, matches = [], currentIndex = -1;
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+            value: '',
+            language: 'xml',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 15,
+            minimap: { enabled: true }
+        });
+    });
+
+    const searchPopup = document.getElementById('searchPopup');
+    const searchInput = document.getElementById('searchInput');
+    const replaceInput = document.getElementById('replaceInput');
+    const resultCount = document.getElementById('resultCount');
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+    }
+
+    document.getElementById('toggleTheme').onclick = () => document.body.classList.toggle('dark');
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); toggleSearchPopup(); searchInput.focus(); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'h') { e.preventDefault(); toggleSearchPopup(); replaceInput.focus(); }
+        if (e.key === 'Enter' && document.activeElement === searchInput) findNext();
+    });
+
+    function toggleSearchPopup() { searchPopup.classList.toggle('active'); }
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            switchTab('editSection');
+            editor.setValue(reader.result);
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    function downloadFile() {
+        const blob = new Blob([editor.getValue()], { type: 'application/x-apple-aspen-config' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'modified.mobileconfig';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function updateSearch() {
+        const query = searchInput.value;
+        if (!query) return clearHighlights();
+
+        matches = editor.getModel().findMatches(query, true,
+            document.getElementById('regex').checked,
+            document.getElementById('matchCase').checked,
+            document.getElementById('wholeWord').checked,
+            false
+        );
+
+        highlightMatches();
+        resultCount.textContent = `${matches.length} kết quả`;
+        currentIndex = -1;
+    }
+
+    searchInput.addEventListener('input', updateSearch);
+
+    function highlightMatches() {
+        editor.deltaDecorations([], matches.map(m => ({
+            range: m.range,
+            options: { inlineClassName: 'myHighlight' }
+        })));
+    }
+
+    function clearHighlights() {
+        editor.deltaDecorations([], []);
+        resultCount.textContent = '0 kết quả';
+        matches = [];
+        currentIndex = -1;
+    }
+
+    function findNext() {
+        if (!matches.length) return;
+        currentIndex = (currentIndex + 1) % matches.length;
+        editor.setSelection(matches[currentIndex].range);
+        editor.revealRangeInCenter(matches[currentIndex].range);
+    }
+
+    function findPrev() {
+        if (!matches.length) return;
+        currentIndex = (currentIndex - 1 + matches.length) % matches.length;
+        editor.setSelection(matches[currentIndex].range);
+        editor.revealRangeInCenter(matches[currentIndex].range);
+    }
+
+    function replace() {
+        if (currentIndex === -1) return;
+        editor.executeEdits('', [{ range: matches[currentIndex].range, text: replaceInput.value }]);
+        updateSearch();
+    }
+
+    function replaceAll() {
+        if (!matches.length) return;
+        const edits = matches.map(m => ({ range: m.range, text: replaceInput.value }));
+        editor.executeEdits('', edits);
+        updateSearch();
+    }
+</script>
+</body>
+</html>
